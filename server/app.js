@@ -62,6 +62,19 @@ const User = require('./models/User');
   app.use("/api/v1/auth",AuthRouter)
   app.use("/api/v1/profile",UserRouter)
   app.use(customErrorHandler)
+  // Error-handling middleware
+app.use((err, req, res, next) => {
+  console.error(err);
+
+  // Customize error response based on error type or default to 500
+  const statusCode = err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
+
+  res.status(statusCode).json({
+    success: false,
+    error: err.message || 'Something went wrong',
+  });
+});
+
 
   const port = process.env.PORT || 5000;
 
@@ -80,3 +93,5 @@ const User = require('./models/User');
   }
 
   start()
+  module.exports = app
+// Do NOT call app.listen(port,...) in Vercel

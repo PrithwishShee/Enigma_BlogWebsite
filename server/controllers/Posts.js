@@ -1,43 +1,43 @@
-const { StatusCodes } = require("http-status-codes")
-const Post = require("../models/Post")
-const { NotFoundError } = require("../errors")
+const { StatusCodes } = require("http-status-codes");
+const Post = require("../models/Post");
+const { NotFoundError } = require("../errors");
 
+const asyncHandler = fn => (req, res, next) =>
+  Promise.resolve(fn(req, res, next)).catch(next);
 
-const createPost = async(req,res) =>{
+const createPost = asyncHandler(async (req, res) => {
+  const { title, intro, content, tags, image: imageURL } = req.body;
+  const { user } = req;
 
-    const { title, intro, content,tags, image:imageURL } = req.body;
-    const { user } = req;
- 
-    const post = new Post({title,intro,content,tags,imageURL,author:user.id})
-    await post.save()
+  const post = new Post({ title, intro, content, tags, imageURL, author: user.id });
+  await post.save();
 
-    res.status(StatusCodes.CREATED).json({success:true,post})
-   
-}
+  res.status(StatusCodes.CREATED).json({ success: true, post });
+});
 
+const updatePost = asyncHandler(async (req, res) => {
+  const postID = req.params.id;
+  const updatedPost = await Post.findByIdAndUpdate(postID, { ...req.body }, {
+    new: true,
+    runValidators: true
+  });
 
-const updatePost = async(req,res) =>{
+  if (!updatedPost) {
+    throw new NotFoundError("Post Not Found");
+  }
 
-    const postID = req.params.id;
-    const updatedPost = await Post.findByIdAndUpdate(postID,{...req.body},{new:true,runValidators:true})
+  res.status(StatusCodes.OK).json({ success: true, updatedPost });
+});
 
-    if(!updatedPost){
-        throw new NotFoundError("Post Not Found")
-    }
+const deletePost = asyncHandler(async (req, res) => {
+  const postID = req.params.id;
+  const deletedPost = await Post.findByIdAndDelete(postID);
 
-    res.status(StatusCodes.OK).json({success:true,updatedPost})
-}
+  if (!deletedPost) {
+    throw new NotFoundError("Post Not Found");
+  }
 
-const deletePost = async(req,res) =>{
-    
-    const postID = req.params.id;
-    const deletedPost = await Post.findByIdAndDelete(postID)
+  res.status(StatusCodes.OK).json({ success: true, deletedPost });
+});
 
-    if(!deletedPost){
-        throw new NotFoundError("Post Not Found")
-    }
-    
-    res.status(StatusCodes.OK).json({success:true,deletedPost})
-}
-
-module.exports = {createPost,updatePost,deletePost}
+module.exports = { createPost, updatePost, deletePost };
