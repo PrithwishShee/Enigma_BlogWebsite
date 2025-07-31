@@ -1,0 +1,3 @@
+1. For all blog posts, there should be an ID
+2. Create a separate route for each individual blog post which shows them in detail
+3. Whenever a blog post is clicked on from the home page, the particular blog post will open in a separate route for detailed view of that post.
